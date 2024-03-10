@@ -1,0 +1,27 @@
+
+
+1. Create an ECR repository
+
+2. Create .env 
+    $ cat > example.txt << EOF
+IMAGE_NAME = aws-lambda
+DOCKER_REPO = <ECR repository uri> # Ex. 123456789012.dkr.ecr.us-east-2.amazonaws.com/aws-lambda
+TAG = latest
+EOF
+
+3. Loging ECR
+    $ aws ecr get-login-password --region us-east-2 | docker login --username AWS --password-stdin  <ECR repo ID>.dkr.ecr.<Zone>.amazonaws.com
+
+4. Create Role
+
+    $ aws iam create-role --role-name lambda-ex --assume-role-policy-document '{"Version": "2012-10-17","Statement": [{ "Effect": "Allow", "Principal": {"Service": "lambda.amazonaws.com"}, "Action": "sts:AssumeRole"}]}'
+
+5. Create function
+    $ aws lambda create-function \
+      --function-name example-aws-lambda \
+      --package-type Image \
+      --code ImageUri=<ECR repository uri>:latest \
+      --role <Role ARN>
+
+6. Test
+    $ aws lambda invoke --function-name example-aws-lambda response.json
